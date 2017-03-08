@@ -10,11 +10,12 @@ import (
 	"github.com/golang-devops/release-co-pilot/util"
 )
 
-func NewPlinkRemoteExec(remoteHost, remoteUser string, remotePort int, remoteCommandArgs ...string) execution.Task {
+func NewPlinkRemoteExec(outDest *[]byte, remoteHost, remoteUser string, remotePort int, remoteCommandArgs ...string) execution.Task {
 	if len(remoteCommandArgs) == 0 {
 		panic("Arg remoteCommandArgs should have at least one element when calling NewPlinkRemoteExec")
 	}
 	return &plinkRemoteExec{
+		outDest:           outDest,
 		remoteHost:        remoteHost,
 		remoteUser:        remoteUser,
 		remotePort:        remotePort,
@@ -23,6 +24,7 @@ func NewPlinkRemoteExec(remoteHost, remoteUser string, remotePort int, remoteCom
 }
 
 type plinkRemoteExec struct {
+	outDest           *[]byte
 	remoteHost        string
 	remoteUser        string
 	remotePort        int
@@ -49,7 +51,7 @@ func (p *plinkRemoteExec) Execute(logger logging.Logger) error {
 	plinkArgs = append(plinkArgs, p.remoteCommandArgs...)
 
 	chmodCmd := exec.Command("plink", plinkArgs...)
-	if err := util.ExecCommand(logger, chmodCmd); err != nil {
+	if err := util.ExecCommand(logger, chmodCmd, p.outDest); err != nil {
 		return errors.New("Plink chmod failed, details written to logger")
 	}
 

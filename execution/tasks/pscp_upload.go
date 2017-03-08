@@ -10,8 +10,9 @@ import (
 	"github.com/golang-devops/release-co-pilot/util"
 )
 
-func NewPSCPUploadDir(localDir string, remoteHost, remoteUser string, remotePort int, remoteParentDir string) execution.Task {
+func NewPSCPUploadDir(outDest *[]byte, localDir string, remoteHost, remoteUser string, remotePort int, remoteParentDir string) execution.Task {
 	return &pscpUploadDir{
+		outDest:    outDest,
 		flags:      []string{"-r", "-C"},
 		localDir:   localDir,
 		remoteHost: remoteHost,
@@ -21,8 +22,9 @@ func NewPSCPUploadDir(localDir string, remoteHost, remoteUser string, remotePort
 	}
 }
 
-func NewPSCPUploadFile(localDir string, remoteHost, remoteUser string, remotePort int, remoteParentDir string) execution.Task {
+func NewPSCPUploadFile(outDest *[]byte, localDir string, remoteHost, remoteUser string, remotePort int, remoteParentDir string) execution.Task {
 	return &pscpUploadDir{
+		outDest:    outDest,
 		flags:      []string{"-r", "-C"},
 		localDir:   localDir,
 		remoteHost: remoteHost,
@@ -34,6 +36,7 @@ func NewPSCPUploadFile(localDir string, remoteHost, remoteUser string, remotePor
 
 type pscpUploadDir struct {
 	flags      []string
+	outDest    *[]byte
 	localDir   string
 	remoteHost string
 	remoteUser string
@@ -61,7 +64,7 @@ func (p *pscpUploadDir) Execute(logger logging.Logger) error {
 		fmt.Sprintf("%s@%s:%s", p.remoteUser, p.remoteHost, p.remotePath),
 	}...)
 	cmd := exec.Command("pscp", pscpArgs...)
-	if err := util.ExecCommand(logger, cmd); err != nil {
+	if err := util.ExecCommand(logger, cmd, p.outDest); err != nil {
 		return errors.New("PSCP upload failed, details written to logger")
 	}
 

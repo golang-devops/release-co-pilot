@@ -8,8 +8,11 @@ import (
 	"github.com/golang-devops/release-co-pilot/logging"
 )
 
-func ExecCommand(logger logging.Logger, cmd *exec.Cmd) error {
+func ExecCommand(logger logging.Logger, cmd *exec.Cmd, output *[]byte) error {
 	out, err := cmd.CombinedOutput()
+	if out != nil && output != nil {
+		*output = out
+	}
 	if err != nil {
 		outStr := ""
 		if out != nil {
