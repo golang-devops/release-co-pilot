@@ -12,41 +12,54 @@ import (
 
 func NewPSCPUploadDir(localDir string, remoteHost, remoteUser string, remotePort int, remoteParentDir string) execution.Task {
 	return &pscpUploadDir{
-		localDir:        localDir,
-		remoteHost:      remoteHost,
-		remoteUser:      remoteUser,
-		remotePort:      remotePort,
-		remoteParentDir: remoteParentDir,
+		flags:      []string{"-r", "-C"},
+		localDir:   localDir,
+		remoteHost: remoteHost,
+		remoteUser: remoteUser,
+		remotePort: remotePort,
+		remotePath: remoteParentDir,
+	}
+}
+
+func NewPSCPUploadFile(localDir string, remoteHost, remoteUser string, remotePort int, remoteParentDir string) execution.Task {
+	return &pscpUploadDir{
+		flags:      []string{"-r", "-C"},
+		localDir:   localDir,
+		remoteHost: remoteHost,
+		remoteUser: remoteUser,
+		remotePort: remotePort,
+		remotePath: remoteParentDir,
 	}
 }
 
 type pscpUploadDir struct {
-	localDir        string
-	remoteHost      string
-	remoteUser      string
-	remotePort      int
-	remoteParentDir string
+	flags      []string
+	localDir   string
+	remoteHost string
+	remoteUser string
+	remotePort int
+	remotePath string
 }
 
 func (p *pscpUploadDir) Execute(logger logging.Logger) error {
 	logger = logger.WithFields(map[string]interface{}{
-		"obj-type":          fmt.Sprintf("%T", p),
-		"local-dir":         p.localDir,
-		"remote-host":       p.remoteHost,
-		"remote-user":       p.remoteUser,
-		"remote-port":       p.remotePort,
-		"remote-parent-dir": p.remoteParentDir,
+		"obj-type":    fmt.Sprintf("%T", p),
+		"local-dir":   p.localDir,
+		"remote-host": p.remoteHost,
+		"remote-user": p.remoteUser,
+		"remote-port": p.remotePort,
+		"remote-path": p.remotePath,
 	})
 
-	pscpArgs := []string{
-		"-r",
-		"-C",
+	pscpArgs := []string{}
+	pscpArgs = append(pscpArgs, p.flags...)
+	pscpArgs = append(pscpArgs, []string{
 		"-P",
 		fmt.Sprintf("%d", p.remotePort),
 		"-agent",
 		p.localDir,
-		fmt.Sprintf("%s@%s:%s", p.remoteUser, p.remoteHost, p.remoteParentDir),
-	}
+		fmt.Sprintf("%s@%s:%s", p.remoteUser, p.remoteHost, p.remotePath),
+	}...)
 	cmd := exec.Command("pscp", pscpArgs...)
 	if err := util.ExecCommand(logger, cmd); err != nil {
 		return errors.New("PSCP upload failed, details written to logger")
