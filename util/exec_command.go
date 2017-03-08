@@ -3,6 +3,7 @@ package util
 import (
 	"errors"
 	"os/exec"
+	"strings"
 
 	"github.com/golang-devops/release-co-pilot/logging"
 )
@@ -15,7 +16,7 @@ func ExecCommand(logger logging.Logger, cmd *exec.Cmd) error {
 			outStr = string(out)
 		}
 		logger.WithError(err).WithFields(map[string]interface{}{
-			"output": outStr,
+			"output": strings.Replace(strings.Replace(outStr, "\n", "\\n", -1), "\r", "", -1),
 		}).Error("Command failed")
 		return errors.New("Command failed")
 	}
