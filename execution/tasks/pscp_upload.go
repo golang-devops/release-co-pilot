@@ -25,7 +25,7 @@ func NewPSCPUploadDir(outDest *[]byte, localDir string, remoteHost, remoteUser s
 func NewPSCPUploadFile(outDest *[]byte, localDir string, remoteHost, remoteUser string, remotePort int, remoteParentDir string) execution.Task {
 	return &pscpUploadDir{
 		outDest:    outDest,
-		flags:      []string{"-r", "-C"},
+		flags:      []string{"-C"},
 		localDir:   localDir,
 		remoteHost: remoteHost,
 		remoteUser: remoteUser,
