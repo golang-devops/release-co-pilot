@@ -11,7 +11,7 @@ import (
 )
 
 func NewPSCPUploadDir(outDest *[]byte, localDir string, remoteHost, remoteUser string, remotePort int, remoteParentDir string) execution.Task {
-	return &pscpUploadDir{
+	return &pscpUpload{
 		outDest:    outDest,
 		flags:      []string{"-r", "-C"},
 		localDir:   localDir,
@@ -23,7 +23,7 @@ func NewPSCPUploadDir(outDest *[]byte, localDir string, remoteHost, remoteUser s
 }
 
 func NewPSCPUploadFile(outDest *[]byte, localDir string, remoteHost, remoteUser string, remotePort int, remoteParentDir string) execution.Task {
-	return &pscpUploadDir{
+	return &pscpUpload{
 		outDest:    outDest,
 		flags:      []string{"-C"},
 		localDir:   localDir,
@@ -34,7 +34,7 @@ func NewPSCPUploadFile(outDest *[]byte, localDir string, remoteHost, remoteUser 
 	}
 }
 
-type pscpUploadDir struct {
+type pscpUpload struct {
 	flags      []string
 	outDest    *[]byte
 	localDir   string
@@ -44,7 +44,7 @@ type pscpUploadDir struct {
 	remotePath string
 }
 
-func (p *pscpUploadDir) Execute(logger logging.Logger) error {
+func (p *pscpUpload) Execute(logger logging.Logger) error {
 	logger = logger.WithFields(map[string]interface{}{
 		"obj-type":    fmt.Sprintf("%T", p),
 		"local-dir":   p.localDir,
